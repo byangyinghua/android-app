@@ -1,10 +1,11 @@
-begantime@13:45:50 //（开始时间：13点45分50秒）
-endtime@15:20:30 //(结束时间：15点20分30秒)
-beganweek@13467 //(星期几播放:星期1，星期3，星期4，星期6，星期天播放。7表示星期天)
-count@9568  //(播放次数，9568次)
-type@2 //（任务类型：1为文本任务，2为图片任务，3为视频任务，4为音频任务）
-interarrivaltime@5  //(切换间隔时间5秒，单位s)
-filecount@3  // (任务文件数量，3个任务文件)
-file1@"abc" // (任务文件1名称)
-file2@"123" // (任务文件2名称)
-file3@"1a2b3c"  //  (任务文件3名称)
+begday@2019-04-30
+begantime@13:24:00
+endday@2019-05-13
+endtime@23:20:30
+beganweek@1234
+tgrade@2
+taskcontent@这测试数据这测试数据这测试数据这测试数据这测试数据这测试数据这测试数据这测试数据这测试数据这测试数
+count@95
+type@2
+interarrivaltime@4
+file@content.txt

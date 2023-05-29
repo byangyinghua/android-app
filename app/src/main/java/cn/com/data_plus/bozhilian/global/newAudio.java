@@ -6,12 +6,14 @@ import android.util.SparseArray;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
 import cn.com.data_plus.bozhilian.App;
 import cn.com.data_plus.bozhilian.bean.local.newTask;
 import cn.com.data_plus.bozhilian.bean.send.HeartBeat;
 import cn.com.data_plus.bozhilian.bean.send.TaskBeat;
 import cn.com.data_plus.bozhilian.util.FileUtil;
 import cn.com.data_plus.bozhilian.util.LogUtil;
+
 public class newAudio {
 
     private SparseArray<MediaPlayer> players;
@@ -26,21 +28,17 @@ public class newAudio {
             if (oldPlayer != null) {
                 oldPlayer.stop();
             }
-
-
             count = Integer.parseInt(task.getTaskPlaynumber());
-
-            String[] szId = task.getTaskFileID().split(Const.SPLIT);
-            mPath = new String[szId.length];
             String[] szUrl = task.getUrl().split(Const.SPLIT);
-            String[] szLenght = task.getTaskFileLength().split(Const.SPLIT);
-
+            mPath = new String[szUrl.length];
             szName = task.getTaskFileName().split(Const.SPLIT);
-            for (int i = 0; i < szId.length; i++) {
-                mPath[i] = FileUtil.getFile(FileUtil.SUB_DIR_MEDIA, szName[i]).getAbsolutePath();
+            if (task.getNetUsbType().equals("usb")) {
+                mPath = szUrl;
+            } else {
+                for (int i = 0; i < szUrl.length; i++) {
+                    mPath[i] = FileUtil.getFile(FileUtil.SUB_DIR_MEDIA, szName[i]).getAbsolutePath();
+                }
             }
-
-
             MediaPlayer mediaPlayer = new MediaPlayer();
             mediaPlayer.setDataSource(mPath[videoCount]);
             mediaPlayer.prepare();

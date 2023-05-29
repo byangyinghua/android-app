@@ -1,4 +1,4 @@
-package cn.com.data_plus.bozhilian.util;
+package usbdatacopy.util;
 
 import android.app.PendingIntent;
 import android.content.Context;
@@ -120,7 +120,7 @@ public class CopyUsbFileUtil {
         vadioList = new ArrayList<>();
         //保存图片类型数据
         imagesList = new ArrayList<>();
-        String path = App.context.getApplicationContext().getFilesDir().getAbsolutePath() + "/BoYaoKeJi";
+        String path = App.context.getFilesDir().getAbsolutePath() + "/BoYaoKeJi";
         deleteDir(path);//删除以前的数据
         UsbOtgMananger.copy(usbFile, path);
 

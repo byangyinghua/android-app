@@ -44,6 +44,100 @@ public class newTask {
     private String TaskFileID;
     @Column
     private String TaskFileLength;
+    @Column
+    private String NetUsbType;
+
+    public String getNetUsbType() {
+        return NetUsbType;
+    }
+
+    public void setNetUsbType(String netUsbType) {
+        NetUsbType = netUsbType;
+    }
+
+    public void setTaskID(String taskID) {
+        TaskID = taskID;
+    }
+
+    public void setTaskName(String taskName) {
+        TaskName = taskName;
+    }
+
+    public void setTaskDate(String taskDate) {
+        TaskDate = taskDate;
+    }
+
+    public void setTaskTime(String taskTime) {
+        TaskTime = taskTime;
+    }
+
+    public void setEndTaskDate(String endTaskDate) {
+        this.endTaskDate = endTaskDate;
+    }
+
+    public void setEndTaskTime(String endTaskTime) {
+        this.endTaskTime = endTaskTime;
+    }
+
+    public void setTaskPlaynumber(String taskPlaynumber) {
+        TaskPlaynumber = taskPlaynumber;
+    }
+
+    public void setTaskContent(String taskContent) {
+        TaskContent = taskContent;
+    }
+
+    public void setTaskType(String taskType) {
+        TaskType = taskType;
+    }
+
+    public void setTaskCreatTime(String taskCreatTime) {
+        TaskCreatTime = taskCreatTime;
+    }
+
+    public void setTaskLevel(String taskLevel) {
+        TaskLevel = taskLevel;
+    }
+
+    public void setTaskFileID(String taskFileID) {
+        TaskFileID = taskFileID;
+    }
+
+    public void setTaskFileLength(String taskFileLength) {
+        TaskFileLength = taskFileLength;
+    }
+
+    public void setTaskPlayModel(String taskPlayModel) {
+        TaskPlayModel = taskPlayModel;
+    }
+
+    public void setTaskState(String taskState) {
+        TaskState = taskState;
+    }
+
+    public void setTaskPlaySate(String taskPlaySate) {
+        TaskPlaySate = taskPlaySate;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
+    }
+
+    public void setTaskFileName(String taskFileName) {
+        TaskFileName = taskFileName;
+    }
+
+    public void setAlarClock(String alarClock) {
+        AlarClock = alarClock;
+    }
+
+    public void setFilePlayTime(String filePlayTime) {
+        this.filePlayTime = filePlayTime;
+    }
+
+    public void setDay(String day) {
+        this.day = day;
+    }
 
     public String getTaskState() {
         return TaskState;
@@ -151,12 +245,14 @@ public class newTask {
                 ", TaskLevel='" + TaskLevel + '\'' +
                 ", TaskFileID='" + TaskFileID + '\'' +
                 ", TaskFileLength='" + TaskFileLength + '\'' +
+                ", NetUsbType='" + NetUsbType + '\'' +
                 ", TaskPlayModel='" + TaskPlayModel + '\'' +
                 ", TaskState='" + TaskState + '\'' +
                 ", TaskPlaySate='" + TaskPlaySate + '\'' +
                 ", url='" + url + '\'' +
                 ", TaskFileName='" + TaskFileName + '\'' +
                 ", AlarClock='" + AlarClock + '\'' +
+                ", filePlayTime='" + filePlayTime + '\'' +
                 ", day='" + day + '\'' +
                 '}';
     }
@@ -175,6 +271,7 @@ public class newTask {
 
     /**
      * @param taskJson
+     * @param type     lai'zhi来自网络和usb的数据区分
      */
     public newTask(String taskJson) {
         JSONObject myJsonObject = null;
@@ -194,7 +291,7 @@ public class newTask {
             }
 
         }
-        if(myJsonObject==null)
+        if (myJsonObject == null)
             return;
         try {
             //获取对应的值

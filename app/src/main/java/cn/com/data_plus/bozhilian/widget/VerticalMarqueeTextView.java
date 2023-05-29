@@ -75,29 +75,30 @@ public class VerticalMarqueeTextView extends ScrollView {
      * @param text The text to set.
      */
     public void setText(final CharSequence text) {
-        LogUtil.debug("text"+text);
-       int i =  text.toString().indexOf(";");
+        LogUtil.debug("text" + text);
+        if (text.toString().contains(":")) {
+            int i = text.toString().indexOf(";");
+        }
         String test = "";
-
         //_@end标题和内容分开
         //_@n;换行和首行缩进
         //_@m 空格
-        test= text.toString().replaceAll("_@end;","\\\n    \\\u3000");
-        test= test.toString().replaceAll("_@n;","\\\n\\\u3000\\\u3000");
-        test = test.toString().replaceAll("_@m;"," ");
-        test = test.toString().replaceAll("，"," , ");
-        test = test.toString().replaceAll("。"," 。 ");
-        test = test.toString().replaceAll("、"," 、 ");
+        test = text.toString().replaceAll("_@end;", "\\\n    \\\u3000");
+        test = test.toString().replaceAll("_@n;", "\\\n\\\u3000\\\u3000");
+        test = test.toString().replaceAll("_@m;", " ");
+        test = test.toString().replaceAll("，", " , ");
+        test = test.toString().replaceAll("。", " 。 ");
+        test = test.toString().replaceAll("、", " 、 ");
         //test= test.toString().substring(1,text.length()-1);
-        LogUtil.debug("test"+test);
-            SpannableString spanString = new SpannableString(test);
+        LogUtil.debug("test" + test);
+        SpannableString spanString = new SpannableString(test);
         //再构造一个改变字体颜色的Span
-        LogUtil.debug("i"+i);
+      //  LogUtil.debug("i" + i);
         ForegroundColorSpan span = new ForegroundColorSpan(Color.BLUE);
         //将这个Span应用于指定范围的字体
-        spanString.setSpan(span,  0, i-4 , Spannable.SPAN_EXCLUSIVE_INCLUSIVE);
+     //   spanString.setSpan(span, 0, i - 4, Spannable.SPAN_EXCLUSIVE_INCLUSIVE);
         AbsoluteSizeSpan absoluteSizeSpan = new AbsoluteSizeSpan(150);
-        spanString.setSpan(absoluteSizeSpan, 0, i-4 ,  Spannable.SPAN_INCLUSIVE_INCLUSIVE);
+     //   spanString.setSpan(absoluteSizeSpan, 0, i - 4, Spannable.SPAN_INCLUSIVE_INCLUSIVE);
 
         this.textView.setText(spanString);
     }
@@ -108,11 +109,9 @@ public class VerticalMarqueeTextView extends ScrollView {
 // 输入参数：input -- 需要转换的字符串
 // 输出参数：无：
 // 返回值: 转换后的字符串
-    public static String halfToFull(String input)
-    {
+    public static String halfToFull(String input) {
         char[] c = input.toCharArray();
-        for (int i = 0; i< c.length; i++)
-        {
+        for (int i = 0; i < c.length; i++) {
             if (c[i] == 32) //半角空格
             {
                 c[i] = (char) 12288;
@@ -123,7 +122,7 @@ public class VerticalMarqueeTextView extends ScrollView {
             //if (c[i] == 46) //半角点号，不转换
             // continue;
 
-            if (c[i]> 32 && c[i]< 127)	//其他符号都转换为全角
+            if (c[i] > 32 && c[i] < 127)    //其他符号都转换为全角
                 c[i] = (char) (c[i] + 65248);
         }
         return new String(c);

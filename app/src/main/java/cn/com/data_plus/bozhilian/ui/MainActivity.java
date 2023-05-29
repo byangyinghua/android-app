@@ -53,11 +53,12 @@ import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -85,15 +86,13 @@ import cn.com.data_plus.bozhilian.thread.Broadcast;
 import cn.com.data_plus.bozhilian.thread.DownloadAsyncApp;
 import cn.com.data_plus.bozhilian.thread.ReadLogAsync;
 import cn.com.data_plus.bozhilian.thread.newDownloader;
-import cn.com.data_plus.bozhilian.util.CopyUsbFileUtil;
+import usbdatacopy.util.CopyUsbFileUtil;
 import cn.com.data_plus.bozhilian.util.FileUtil;
 import cn.com.data_plus.bozhilian.util.LogUtil;
 import cn.com.data_plus.bozhilian.util.MemoryUtils;
 import cn.com.data_plus.bozhilian.util.NetworkUtil;
 import cn.com.data_plus.bozhilian.util.StringUtil;
 import cn.com.data_plus.bozhilian.util.UtilAudio;
-import cn.com.data_plus.bozhilian.util.dialog.CommonDialog;
-import cn.com.data_plus.bozhilian.util.dialog.DialogUtils;
 import cn.com.data_plus.bozhilian.util.window.CouponListWindow;
 import cn.com.data_plus.bozhilian.widget.StateImageView;
 import cn.com.data_plus.bozhilian.widget.TSnackbar;
@@ -106,12 +105,14 @@ public class MainActivity extends FragmentActivity implements SelectPort {
     //handle order
     private Handler mHandler = new Handler(new HandlerCallback());
 
+
     @Override
     public void select(MedioBean item) {
 
     }
 
     private class HandlerCallback implements Handler.Callback {
+
         //102文本任务
         @Override
         public boolean handleMessage(Message msg) {
@@ -141,8 +142,9 @@ public class MainActivity extends FragmentActivity implements SelectPort {
                 case Const.RECV_TASK://添加新的任务队列
 //                    try {
                     String[] sb = content.split("L&Q");
-                    newTask task = new newTask(sb[0]);//niu 设置json数据 解析
 
+                    final newTask task = new newTask(sb[0]);//niu 设置json数据 解析
+                    task.setNetUsbType(picFragment.NET_DATA);
                     Log.e("TAG", "!!!!!!!!!！---接收到任务---" + task.toString());
                     Log.e("TAG", "!!!!!!!!!！---接收到任务---" + content.toString());
 
@@ -288,21 +290,18 @@ public class MainActivity extends FragmentActivity implements SelectPort {
                     break;
 
                 case Const.MSG_PLAY_PIC:
-
                     try {
                         showFragment(picFragment.newInstance(content));
+
                         // Log.e("TAG", "!!!!!!!!!！---MSG_PLAY_PIC---" + content);
                         JSONObject js = new JSONObject(content.toString());
                         String c = js.optString("TaskContent");
-
                         if (!c.equals("")) {
                             showBottomText(c);
                         }
                     } catch (JSONException e) {
                         Log.e("Exception", e.toString());
                     }
-
-
                     break;
                 case Const.MSG_CLOSE_FRAGMENT:
                     closeFragment();
@@ -320,11 +319,13 @@ public class MainActivity extends FragmentActivity implements SelectPort {
                 case Const.MSG_SHOW_TOP_TEXT:
                     mTextView.setText(content);
                     break;
-                case Const.MSG_SHOW_LARGE_TEXT:
-                    UtilAudio.getInstance().startPlayMusic(MainActivity.this);
+                case Const.MSG_SHOW_LARGE_TEXT://文本数据
+
+                    UtilAudio.getInstance().startPlayMusic(MainActivity.this);//这里content中添加了区分net和usb的数据内容
                     showFragment(TextFragment.newInstanceLarge(content));
+
                     break;
-                case Const.MSG_RESET_PROGRESS:
+                case Const.MSG_RESET_PROGRESS://任务进度显示
                     setProgressBarText(content);
                     break;
                 case Const.MSG_SHOW_PROGRESS:
@@ -593,22 +594,25 @@ public class MainActivity extends FragmentActivity implements SelectPort {
                     break;
                 //niu 2019年4月25日15:28:38
                 case -888://获取到usb中txt文件数据
-                    showToastMsg(content);
+                    String str = "拷贝完成";
+                    AppMessager.resetProgress(str);
+                    AppMessager.resetProgress(" ");
                     new Thread() {
                         @Override
                         public void run() {
                             super.run();
+                            String pathPatent = App.context.getApplicationContext().getFilesDir().getAbsolutePath() + "/"
+                                    + CopyUsbFileUtil.U_DISK_FILE_NAME_PREANT;
+                            String pathUrl = pathPatent + CopyUsbFileUtil.U_DISK_FILE_NAME;//得到txt文件路径;
                             //读取txt文件内容
-                            String path = App.context.getApplicationContext().getFilesDir().getAbsolutePath() + "/"
-                                    + CopyUsbFileUtil.U_DISK_FILE_NAME_PREANT + CopyUsbFileUtil.U_DISK_FILE_NAME;//得到txt文件路径
                             String str = "";
                             InputStream is = null;
                             StringBuilder sbstr = new StringBuilder();
                             BufferedReader bufferedReader = null;
                             try {
-                                is = new FileInputStream(path);
+                                is = new FileInputStream(pathUrl);
                                 //读取秘钥中的数据进行匹配
-                                bufferedReader = new BufferedReader(new InputStreamReader(is));
+                                bufferedReader = new BufferedReader(new InputStreamReader(is,"UTF-8"));
                                 String read;
                                 List<String> configTask = new ArrayList<>();//把一个任务存入集合
                                 while ((read = bufferedReader.readLine()) != null) {
@@ -620,6 +624,117 @@ public class MainActivity extends FragmentActivity implements SelectPort {
                                 msgs.what = -903;
                                 msgs.obj = str;
                                 mHandler.sendMessage(msgs);
+                                newTask txtTask = new newTask();
+                                String fn = "";//文件名称
+                                String urls = "";//文件路径
+                                for (int j = 0; j < configTask.size(); j++) {
+                                    if (configTask.get(j).contains("@")) {
+                                        String s = configTask.get(j).split("@")[1];//拆分字符串
+                                        String type = configTask.get(j).split("@")[0];//拆分字符串
+                                        switch (type) {
+                                            case "taskid":
+                                                txtTask.setTaskID(s);
+                                                break;
+                                            case "taskname":
+                                                txtTask.setTaskName(s);
+                                                break;
+                                            case "begday":
+                                                txtTask.setTaskDate(s);
+                                                break;
+                                            case "begantime":
+                                                txtTask.setTaskTime(s);
+                                                break;
+                                            case "endday":
+                                                txtTask.setEndTaskDate(s);
+                                                break;
+                                            case "endtime":
+                                                txtTask.setEndTaskTime(s);
+                                                break;
+                                            case "beganweek":
+                                                String[] day = s.split("");
+                                                String d = "";
+                                                for (int i = 1; i < day.length; i++) {
+                                                    d = d + day[i] + ",";
+                                                }
+                                                txtTask.setDay(d);
+                                                break;
+                                            case "count":
+                                                txtTask.setTaskPlaynumber(s);
+                                                break;
+                                            case "taskcontent":
+                                                txtTask.setTaskContent(s);
+                                                break;
+                                            case "tgrade":
+                                                txtTask.setTaskLevel(s);
+                                                break;
+                                            case "type":
+                                                txtTask.setTaskType(s);
+                                                break;
+                                            case "interarrivaltime":
+                                                txtTask.setFilePlayTime(s);
+                                                break;
+                                            case "filecount":
+
+                                                break;
+                                            case "file"://这里暂时不设置文件id
+                                                String[] nam = s.split(":");
+                                                for (int i = 0; i < nam.length; i++) {
+                                                    fn = nam[i] + Const.SPLIT + fn;
+                                                    String urlfile = pathPatent + "/" + nam[i];
+                                                    File file = new File(urlfile);
+                                                    if (file.exists())//判断文件是否存在
+                                                        urls = urlfile + Const.SPLIT + urls;//图片地址拼接
+                                                }
+                                                txtTask.setTaskFileName(fn);
+                                                txtTask.setUrl(urls);
+                                                txtTask.setNetUsbType(picFragment.USB_DATA);//usb数据
+                                                break;
+                                        }
+                                    }
+                                }
+                                txtTask.setAlarClock("1");
+                                txtTask.setTaskPlaySate("0");
+                                txtTask.setTaskID("999");
+                                txtTask.setTaskName("22-1");//不知道是不是这些新
+
+                                if (txtTask.getTaskType().equals("2"))//文本展示时需要复制txt文件数据到setTaskContent中
+                                { //读取txt文件内容
+                                    String content = "";
+                                    InputStream ist = null;
+                                    StringBuilder sbstrt = new StringBuilder();
+                                    BufferedReader bufferedReadert = null;
+                                    try {
+                                        ist = new FileInputStream(txtTask.getUrl().replace(Const.SPLIT, ""));
+                                        //读取秘钥中的数据进行匹配
+                                        bufferedReadert = new BufferedReader(new InputStreamReader(ist));
+                                        String readt;
+                                        while ((readt = bufferedReadert.readLine()) != null) {
+                                            sbstrt.append(readt);
+                                        }
+                                        content = new String(sbstrt.toString().getBytes("GBK"), "GBK");
+                                    } catch (Exception e) {
+                                        e.printStackTrace();
+                                    } finally {
+                                        try {
+                                            if (bufferedReader != null) {
+                                                bufferedReader.close();
+                                            }
+                                        } catch (IOException e) {
+                                            e.printStackTrace();
+                                        }
+                                    }
+                                    txtTask.setTaskContent(content);
+                                }
+
+                                if (App.newTasks != null) {//注意这里多任务需要注意重新处理
+                                    for (newTask n : App.newTasks) {
+                                        if (n.getTaskID().equals("999")) {//U盘任务id
+                                            newAlarm.getInstance().stopTask(n, 1);//删除之前任务
+                                        }
+                                    }
+                                }
+                                App.newtaskDao().insertOrReplace(txtTask);//插入解析好的json数据
+                                newAlarm.getInstance().setTaskAlarm(txtTask);
                             } catch (Exception e) {
                                 e.printStackTrace();
                             } finally {
@@ -645,7 +760,7 @@ public class MainActivity extends FragmentActivity implements SelectPort {
                     mHandler.post(new Runnable() {
                         @Override
                         public void run() {
-                            String path = App.context.getApplicationContext().getFilesDir().getAbsolutePath() + CopyUsbFileUtil.URL_PRANTE;
+                            String path = App.context.getFilesDir().getAbsolutePath() + CopyUsbFileUtil.URL_PRANTE;
                             List<MedioBean> made = new ArrayList<>();
                             cufu.traverseFolder2(path, made);
                             if (!made.isEmpty()) {//给出选择框
@@ -655,7 +770,6 @@ public class MainActivity extends FragmentActivity implements SelectPort {
                             }
                         }
                     });
-
                  /*   DialogUtils.showTwoKeyDialog(MainActivity.mContext, new CommonDialog.ClickCallBack() {
                         @Override
                         public void onConfirm() {
@@ -734,7 +848,6 @@ public class MainActivity extends FragmentActivity implements SelectPort {
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON,
                 WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         Gpio.init(MainActivity.this);
-        App.context = this;
         mContext = this;
         myContext = this.getApplicationContext();
         Gpio.writeGpio('e', 2, 0);
@@ -777,6 +890,15 @@ public class MainActivity extends FragmentActivity implements SelectPort {
         msg.obj = "是否播放";
         mHandler.sendMessage(msg);
 */
+        String start = "file@��һ�����.mp3:������.mp3:��������.mp3";
+        try {
+
+            String str = new String(start.getBytes("US-ASCII"), "UTF-8");
+            String y = URLEncoder.encode(start, "UTF-8");
+            String ss = y;
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
     }
 
 
@@ -836,7 +958,7 @@ public class MainActivity extends FragmentActivity implements SelectPort {
         for (int i = 0; i < bs.length; i++) {
             bit = (bs[i] & 0x0f0) >> 4;
             sb.append(chars[bit]);
-            bit = bs[i] & 0x0f;
+            bit = bs[i] & 0x0f;--
             sb.append(chars[bit]);
             // sb.append(' ');
 
@@ -1116,24 +1238,23 @@ public class MainActivity extends FragmentActivity implements SelectPort {
         if (content.equals("")) {
             return;
         }
-
-        String[] lens = content.split(Const.SPLIT);
+        String[] lens = new String[]{};
+        if (content.contains(Const.SPLIT)) {
+            lens = content.split(Const.SPLIT);
+        }
         if (lens.length > 0) {
             mTvBottom.setTextSize(100);
-
             mTvBottom.setVisibility(View.VISIBLE);
             mTvBottom.setText(lens[0]);
         } else {
             mTvBottom.setVisibility(View.VISIBLE);
             mTvBottom.setText(content);
         }
-
     }
 
     public void hideBottomText() {
         mTvBottom.setVisibility(View.GONE);
     }
-
 
     private void showToast(String str) {
         String[] strs = StringUtil.splitByHyphen(str);

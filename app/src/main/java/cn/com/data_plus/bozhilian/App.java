@@ -37,7 +37,7 @@ import cn.com.data_plus.bozhilian.util.NetworkUtil;
 import cn.com.data_plus.bozhilian.util.TimeUtil;
 import tv.danmaku.ijk.media.player.IjkMediaPlayer;
 
-public class App extends Application  implements Thread.UncaughtExceptionHandler{
+public class App extends Application implements Thread.UncaughtExceptionHandler {
     // implements Thread.UncaughtExceptionHandler
     private static final String TAG = "TAG";
     public static App app;
@@ -87,14 +87,13 @@ public class App extends Application  implements Thread.UncaughtExceptionHandler
     }
 
 
-
     @Override
     public void onCreate() {
         super.onCreate();
         app = this;
         sGson = new Gson();
         sServerMessager = new ServerMessager();
-
+        context = getApplicationContext();
         deviceID = Config.getInstance().getDeviceID();
         serverAddr = NetworkUtil.getPhoneIp() + ":" + Const.SERVER_POST;
         date = TimeUtil.getDate();
@@ -112,11 +111,11 @@ public class App extends Application  implements Thread.UncaughtExceptionHandler
         mAudioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
         audio = (AudioManager) getSystemService(Service.AUDIO_SERVICE);
 
-        Thread.setDefaultUncaughtExceptionHandler(this);
+      //  Thread.setDefaultUncaughtExceptionHandler(this);
 
     }
 
-    public static void getinit(){
+    public static void getinit() {
         deviceID = Config.getInstance().getDeviceID();
         serverAddr = NetworkUtil.getPhoneIp() + ":" + Const.SERVER_POST;
         date = TimeUtil.getDate();
@@ -156,7 +155,7 @@ public class App extends Application  implements Thread.UncaughtExceptionHandler
 
     @Override
     public void uncaughtException(Thread t, Throwable e) {
-        LogUtil.debug("出了个未知的状况~~~~"+e.toString());
+        LogUtil.debug("出了个未知的状况~~~~" + e.toString());
 
         e.printStackTrace();
         // LogUtil.error(e);
@@ -171,8 +170,8 @@ public class App extends Application  implements Thread.UncaughtExceptionHandler
                 .getLaunchIntentForPackage(getBaseContext().getPackageName());
         PendingIntent restartIntent = PendingIntent.getActivity(getApplicationContext(), 0, intent, PendingIntent.FLAG_ONE_SHOT);
         AlarmManager mgr = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-        mgr.set(AlarmManager.RTC, System.currentTimeMillis() + 1000, restartIntent); // 1秒钟后重启应用
-        System.exit(0);
+       // mgr.set(AlarmManager.RTC, System.currentTimeMillis() + 1000, restartIntent); // 1秒钟后重启应用
+     //   System.exit(0);
     }
 
     public static void startServerMessager() {

@@ -1,12 +1,12 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 24
-    buildToolsVersion "25.0.0"
+    compileSdkVersion 29
+    buildToolsVersion '30.0.2'
     defaultConfig {
         applicationId "com.zyp.bzl.myapplication"
         minSdkVersion 19
-        targetSdkVersion 19
+        targetSdkVersion 29
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
@@ -16,7 +16,14 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            jniDebuggable true
         }
+    }
+    compileOptions {
+        targetCompatibility 28
+    }
+    dependenciesInfo {
+        includeInApk app
     }
 
     configurations.all {
@@ -26,19 +33,22 @@ android {
 
 
 dependencies {
-    compile fileTree(include: ['*.jar'], dir: 'libs')
-    androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    implementation 'com.android.support:support-annotations:28.0.0'
+    androidTestImplementation('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
-    implementation 'com.android.support:appcompat-v7:25.+'
+    //noinspection GradleCompatible
+    implementation 'com.android.support:appcompat-v7:25'
 
-    implementation 'com.android.support:design:25.+'
+    //noinspection GradleCompatible,GradleCompatible
+    implementation 'com.android.support:design:24'
     implementation 'com.android.support.constraint:constraint-layout:1.0.2'
-    testCompile 'junit:junit:4.12'
+    testImplementation 'junit:junit:4.12'
     implementation 'com.google.code.gson:gson:2.4'
-    compile files('libs/betye-socket-1.0.0.jar')
-    compile files('libs/gpio.jar')
-    compile project(path: ':db-lib')
+    implementation files('libs/betye-socket-1.0.0.jar')
+    implementation files('libs/gpio.jar')
+    implementation project(path: ':db-lib')
 
     //    # required, enough for most devices.
     implementation 'tv.danmaku.ijk.media:ijkplayer-java:0.6.1'
@@ -57,8 +67,8 @@ dependencies {
         transitive = true
     }
     implementation 'com.zhy:autolayout:1.4.5'
-    compile project(path: ':library')
-    compile project(path: ':app_serialport')
+    implementation project(path: ':library')
+    implementation project(path: ':app_serialport')
 //usb
    // implementation 'com.github.mjdev:libaums:0.6.0'
     implementation 'com.github.mjdev:libaums:0.5.5'

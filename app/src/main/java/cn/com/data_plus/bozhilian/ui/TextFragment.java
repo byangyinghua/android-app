@@ -9,6 +9,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import cn.com.data_plus.bozhilian.R;
+import cn.com.data_plus.bozhilian.global.Const;
 import cn.com.data_plus.bozhilian.widget.VerticalMarqueeTextView;
 
 public class TextFragment extends BaseFragment {

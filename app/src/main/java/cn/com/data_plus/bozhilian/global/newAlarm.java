@@ -69,6 +69,7 @@ public class newAlarm {
     }
 
     //niu  设置定时任务
+
     public void setTaskAlarm(newTask task) {
 
 //        try {
@@ -85,8 +86,7 @@ public class newAlarm {
         } else {
             begin = TimeUtil.getMilliSecond(App.date, task.getTaskTime());
             end = TimeUtil.getMilliSecond(App.date, task.getEndTaskTime());
-        }
-
+        }//1556550000000
         setAlarm(begin, buildTaskPendingIntent(ACTION_START, task));//开始任务时间
         setAlarm(end, buildTaskPendingIntent(ACTION_STOP, task));//结束任务时间
         //LogUtil.info("任务(" + task.getTaskName() + task.getTaskDate() + " " + task.getTaskTime() + ")设置闹钟成功");
@@ -191,13 +191,14 @@ public class newAlarm {
 //        LogUtil.debug( "EndTaskTime>>>" + task.getEndTaskTime());
 //        LogUtil.debug( "TaskLevel>>>" + task.getTaskLevel());
         try {
-            if (TimeUtil.isEffectiveDate(new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).parse(TimeUtil.getDate()), new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).parse(task.getTaskDate()), new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).parse(task.getEndTaskDate()))) {
-                LogUtil.debug(">>>false");
-                if (TimeUtil.isInTime(task.getTaskTime() + "-" + task.getEndTaskTime(), TimeUtil.getTime())) {
-                    return true;
-                }
+            if (task != null && task.getTaskDate() != null)
+                if (TimeUtil.isEffectiveDate(new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).parse(TimeUtil.getDate()), new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).parse(task.getTaskDate()), new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).parse(task.getEndTaskDate()))) {
+                    LogUtil.debug(">>>false");
+                    if (TimeUtil.isInTime(task.getTaskTime() + "-" + task.getEndTaskTime(), TimeUtil.getTime())) {
+                        return true;
+                    }
 
-            }
+                }
         } catch (ParseException e) {
             e.printStackTrace();
         }
@@ -242,12 +243,11 @@ public class newAlarm {
             task.updateAlarClock("1");
             int fileType = Integer.parseInt(task.getTaskType());
             LogUtil.debug(" ， 任务类型！" + fileType);
-            if (fileType == 0) {//audio
+            if (fileType == 0) {//audio 音频
                 newAudio.getInstance().startPlayMusic(task);
             } else if (fileType == 1) {//video
                 AppMessager.send2Activity(Const.MSG_PLAY_VIDEO, App.gson().toJson(task));
             } else if (fileType == 3) {//video
-
                 AppMessager.send2Activity(Const.MSG_PLAY_PIC, App.gson().toJson(task));
                 //PlayPic.getInstance().PlayPics(task);
             } else {//text
@@ -261,21 +261,16 @@ public class newAlarm {
             }
             return;
         }
-
         for (newTask n : App.newTasks) {
             if (n.getTaskLevel() == "0") {
                 LogUtil.debug("有一个预案正在执行中，所有任务暂停播放！");
                 return;
             }
         }
-
-
         LogUtil.debug("day>>>>>" + task.getDay());
         //返回1是星期日、2是星期一、3是星期二、4是星期三、5是星期四、6是星期五、7是星期六
         int day = getDayofweek("");
         String[] days = task.getDay().split(",");
-
-
         int newday = 0;
         if (day == 2) {
             newday = 1;
@@ -292,14 +287,11 @@ public class newAlarm {
         } else if (day == 1) {
             newday = 7;
         }
-
         if (task.getDay().indexOf(newday + "") == -1) {
 
             LogUtil.debug("任务不可以执行");
             return;
         }
-
-
         //  LogUtil.debug("来了一个新任务，开始检查是否有任务列表");
         if (App.newTasks.size() > 0) {
             // LogUtil.debug("任务列表里有正在执行的任务或者待执行任务，默认取得第一个");
@@ -648,6 +640,7 @@ public class newAlarm {
     public void setAlarm(long time, PendingIntent pendingIntent) {
         ////AlarmManager.RTC_WAKEUP 在系统精确时间触发，会唤醒cpu
         mAlarmManager.setExact(AlarmManager.RTC_WAKEUP, time, pendingIntent);
+
     }
 
     //set the time of this machine

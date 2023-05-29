@@ -75,19 +75,26 @@ public class VideoFragment extends BaseFragment
         LogUtil.info("surfaceCreated");
         String taskJson = getArguments().getString(TASK_JSON);
         mTask = App.gson().fromJson(taskJson, newTask.class);
+
         if (!TextUtils.isEmpty(taskJson)) {
-            String[] szId = mTask.getTaskFileID().split(Const.SPLIT);
-            mPath = new String[szId.length];
-            String[] szUrl = mTask.getUrl().split(Const.SPLIT);
-            String[] szLenght = mTask.getTaskFileLength().split(Const.SPLIT);
-            szName = mTask.getTaskFileName().split(Const.SPLIT);
-            for (int i = 0; i < szId.length; i++) {
-                mPath[i] = FileUtil.getFile(FileUtil.SUB_DIR_MEDIA, szName[i]).getAbsolutePath();
+            String[] szUrl = new String[]{};
+            if (mTask.getUrl().contains(Const.SPLIT)) {
+                szUrl = mTask.getUrl().split(Const.SPLIT);
             }
-            mLooping = Integer.parseInt(mTask.getTaskPlayModel()) == 1;
+            mPath = new String[szUrl.length];
+            //    String[] szLenght = mTask.getTaskFileLength().split(Const.SPLIT);
+            szName = mTask.getTaskFileName().split(Const.SPLIT);
+            if (mTask.getNetUsbType().equals(picFragment.NET_DATA)) {//网络视频
+                for (int i = 0; i < szUrl.length; i++) {
+                    mPath[i] = FileUtil.getFile(FileUtil.SUB_DIR_MEDIA, szName[i]).getAbsolutePath();
+                }
+            } else if (mTask.getNetUsbType().equals(picFragment.USB_DATA)) {//usb视频任务
+                mPath = mTask.getUrl().split(Const.SPLIT);
+            }
+            if (mTask.getTaskPlayModel() != null)
+                mLooping = Integer.parseInt(mTask.getTaskPlayModel()) == 1;
             count = Integer.parseInt(mTask.getTaskPlaynumber());
         }
-
         //初始化MediaPlayer
         if (mMediaPlayer != null) {
             return;
@@ -116,12 +123,9 @@ public class VideoFragment extends BaseFragment
         mMediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
             @Override
             public void onCompletion(MediaPlayer mp) {
-
                 if (count == 1 && mPath.length == 1) {
                     LogUtil.info("执行完毕");
                     onStop();
-
-
 //                    mActivity.closeFragment();
 //                    mActivity.hideBottomText();
                     AppMessager.send2Activity(Const.MSG_CLOSE_FRAGMENT, "");

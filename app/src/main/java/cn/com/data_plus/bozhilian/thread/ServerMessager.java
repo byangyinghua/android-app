@@ -45,8 +45,6 @@ public class ServerMessager implements Runnable {
             }
         }
         LogUtil.debug("主通信线程结束");
-
-
     }
 
     private void connect() {
@@ -128,9 +126,7 @@ public class ServerMessager implements Runnable {
                 order = Const.MSG_CONNECT_FAILED_BY_REMOVE_FROM_SERVER;
                 content = "";
                 isConnected = false;
-
                 AppMessager.send2Activity(Const.MSG_NOTICE_CONNECT_STATE, Const.STATE_BREAK);
-
                 LogUtil.error("服务器断开");
                 App.restartServerMessager();
             } else {
@@ -162,6 +158,7 @@ public class ServerMessager implements Runnable {
             AppMessager.send2Server(Const.SEND_MSG_CODE, App.gson().toJson(taskMsgCode));
         }
     }
+
     public void send(int order, String jsonContent) {
         try {
             if (isConnected) {

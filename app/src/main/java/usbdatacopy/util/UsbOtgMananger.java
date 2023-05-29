@@ -23,6 +23,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+import cn.com.data_plus.bozhilian.global.AppMessager;
+
 public class UsbOtgMananger {
     public static Handler mHandler = null;
 
@@ -275,6 +277,8 @@ public class UsbOtgMananger {
                 copy(fromFile, toFile + currentFiles[i].getName() + "/");
             } else//如果当前项为文件则进行文件拷贝
             {
+                String str = "媒体文件(" + currentFiles[i].getName() + ")正在拷贝中";
+                AppMessager.resetProgress(str);
                 CopySdcardFile(currentFiles[i], toFile + "/" + currentFiles[i].getName());
             }
         }
@@ -286,12 +290,17 @@ public class UsbOtgMananger {
     public static boolean CopySdcardFile(UsbFile cFolder, String toFile) {
         //   EventBus.getDefault().post(new MessageEvent(MyDataType.COPYING,cFolder.getLength()));//正在拷贝文件
         try {
+            long totalRead = 0;
+            long fileLength = cFolder.getLength();
             InputStream inusb = new UsbFileInputStream(cFolder);
             OutputStream fosto = new FileOutputStream(toFile);
-            byte bt[] = new byte[1024 * 1000];
+
+            byte bt[] = new byte[1024*100];
             int c;
             while ((c = inusb.read(bt)) != -1) {
                 fosto.write(bt, 0, c);
+                totalRead += c;
+                AppMessager.showProgress((int) (totalRead / (fileLength + 0.0f) * 100));
             }
             mIdent--;
             Log.i(" songkunjian", " 完成拷贝==:" + mIdent);
